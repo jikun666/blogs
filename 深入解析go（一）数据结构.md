@@ -165,6 +165,10 @@ func main() {
 }
 ```
 
+### map
+
+map 是指针。但需要注意的是，nil map 可读不可写（会panic)。
+
 ### channel
 
 channel 和 slice 不同，channel 是一个指针。
@@ -193,6 +197,48 @@ func main() {
 - 向一个已经关闭的 channel 写会 panic；
 - 关闭一个已经关闭的 channel 会 panic；
 
-### map
 
-map 是指针。但需要注意的是，nil map 可读不可写（会panic)。
+
+channel 定义：
+
+```go
+type hchan struct {
+	qcount   uint           // total data in the queue
+	dataqsiz uint           // size of the circular queue(环形队列)
+	buf      unsafe.Pointer // points to an array of dataqsiz elements
+	elemsize uint16
+	closed   uint32
+	elemtype *_type // element type
+	sendx    uint   // send index
+	recvx    uint   // receive index
+	recvq    waitq  // list of recv waiters
+	sendq    waitq  // list of send waiters
+
+	// lock protects all fields in hchan, as well as several
+	// fields in sudogs blocked on this channel.
+	//
+	// Do not change another G's status while holding this lock
+	// (in particular, do not ready a G), as this can deadlock
+	// with stack shrinking.
+	lock mutex // 互斥锁，chan不允许并发读写
+}
+```
+
+最主要的字段是 buf （环形队列），存放着 channel 中的具体数据。
+
+![](images/channel-circular.jpg)
+
+recvq 和 sendq 中是等待消费和生产的 goroutines。
+
+
+![](images/channel-waitq.jpg)
+
+
+**因读阻塞的goroutine会被向channel写入数据的goroutine唤醒**，下面是向channel 写数据的过程：
+
+![](images/channel-write.jpg)
+
+
+**因写阻塞的goroutine会被从channel读数据的goroutine唤醒**，下面是向channel 读数据的过程：
+
+![](images/channel-read.jpg)
