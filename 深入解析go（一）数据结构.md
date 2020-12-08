@@ -4,6 +4,9 @@
 
 字符串在Go语言内存模型中用一个2字长的数据结构表示。
 
+
+---
+
 ## slice
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/2020113011045824.png)
@@ -61,6 +64,8 @@ new返回一个指向已清零内存的指针，而make返回一个复杂的结�
 
 ![在这里插入图片描述](https://img-blog.csdnimg.cn/20201130152607797.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ppa3Vuazg=,size_16,color_FFFFFF,t_70)
 
+---
+
 ## map
 
 go 中的 map 是用哈希表实现的。
@@ -89,6 +94,12 @@ func main() {
 
 注意每次输出数据不同，这个和哈希表的实现有关。
 
+
+
+### 扩容
+
+和 redis 的 rehash 类似，扩容不是一次性完成的，而是一个渐进式的过程。在每次插入或删除时都会进行 1～2 个键值对的搬移，
+
 ### 查找过程
 
 主要关注扩容时的查找。
@@ -115,6 +126,7 @@ func main() {
 
 删除则需要多一些顺序查找找到确切对应的 kv 对，然后进行删除。
 
+---
 
 ## nil
 
@@ -169,7 +181,9 @@ func main() {
 
 map 是指针。但需要注意的是，nil map 可读不可写（会panic)。
 
-### channel
+---
+
+## channel
 
 channel 和 slice 不同，channel 是一个指针。
 
