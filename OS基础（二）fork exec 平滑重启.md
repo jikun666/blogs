@@ -28,12 +28,16 @@ exec() 函数负责读取可执行文件并将其载入地址空间开始运行�
 
 这样便能使“父进程”继续执行，“子进程”执行另一程序了。
 
+更重要的，通过 fork 创建子进程的方式可以实现父子进程监听相同的端口。
+
 
 
 所谓的平滑重启即是如此原理。可参考 https://github.com/facebookarchive/grace.git。
 
+fork 出的子进程监听继承过来的端口，然后继续通过 `os.Getppid()` 获取父进程的进程号，向父进程发送 kill 命令（`syscall.Kill(ppid, syscall.SIGTERM)`）。父进程收到信号后会执行优雅退出。
 
-在上面的仓库中，并没有显式调用 fork，但其实干的就是 fork 的事。
+
+在上面的仓库中，并没有显式调用 fork+exec，上面通过环境变量传递监听描述字完成监听端口的继承，就不需要其他的 fork 过程了。
 
 仓库使用在进程启动时执行的 `didInherit = os.Getenv("LISTEN_FDS") != ""` 判断是否是“子进程”。
 
