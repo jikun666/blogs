@@ -137,8 +137,8 @@ rehash 并不是一次性、集中式地完成，而是一个渐进过程。
 
 1. 为 ht[1] 分配比 ht[0] 更大的空间（通常是 2 倍）；
 2. 将 rehashidx 置为 0，表示 rehash 过程正式开始；
-3. 在 rehash 期间，每次对字典增删改查时，还会顺带将 ht[0] 在 rehashidx 索引上的所有键值对 rehash 到 ht[1]，当 rehash 工作完成后，程序将 rehashidx 属性当值增一；
-4. 随着字典操作当不断进行，最终在某个时间点上，ht[0] 的所有键值对都会被 rehash 至 ht[1]，这时程序将 rehashidx 属性的值设为 -1，表示 rehash 操作已完成。
+3. 在 rehash 期间，每次对字典增删改查时，还会顺带将 ht[0] 在 rehashidx 索引上的所有键值对 rehash 到 ht[1]，当 rehash 工作完成后，程序将 rehashidx 属性的值增一；
+4. 随着字典操作的不断进行，最终在某个时间点上，ht[0] 的所有键值对都会被 rehash 至 ht[1]，这时程序将 rehashidx 属性的值设为 -1，表示 rehash 操作已完成。
 
 
 ## 跳跃表
