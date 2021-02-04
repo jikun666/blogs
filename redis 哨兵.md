@@ -78,7 +78,7 @@ SUBSCRIBE __sentinel__:hello
 
 当 sentinel 接收订阅到的消息，解析其中的哨兵信息和主节点信息，当解析得到的 s_runid 字段和自身的 runid 相同，则证明是自身发送的消息，则忽略本次消息，否则是其他哨兵发送的消息，需要对相应主节点对实例结构进行更新。
 
-因为一个 sentinel 可以通过分析接收到的频道信息获知其他 sentinel 的存在，并通过发送频道信息来让其他 sentinel 知道自己的存在，所以用户在使用 sentinel 时不需要提供各个 sentinel 的信息，监视同一个饿主节点的多个 sentinel 可以自动发现对方。
+因为一个 sentinel 可以通过分析接收到的频道信息获知其他 sentinel 的存在，并通过发送频道信息来让其他 sentinel 知道自己的存在，所以用户在使用 sentinel 时不需要提供各个 sentinel 的信息，监视同一个主节点的多个 sentinel 可以自动发现对方。
 
 
 ## 创建 sentinel 之间的命令连接
