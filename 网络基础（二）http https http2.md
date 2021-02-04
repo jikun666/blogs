@@ -71,7 +71,7 @@
 
 ![](images/chrom-ca.png)
 
-打开证书顶部会看到证书连，即由根证书到该证书的颁发链条。
+打开证书顶部会看到证书链，即由根证书到该证书的颁发链条。
 
 其次会看到 Subject(使用者)、Issuer(颁发者，即颁发该证书的 CA)、PublicKeyInfo(公钥信息)、Fingerprints(数字签名)四个部分。
 

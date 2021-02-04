@@ -24,10 +24,22 @@ func main() {
 	a := make([]int, 2, 5)
 	a[0] = 1
 	a[1] = 2
-	b := a[:5]
-	println(b[0]) // 1
-	println(b[4]) // 0, 只要不超过 a 的 cap，就不算越界也不会 panic
-	// println(b[6]) 会 panic
+	// println(a[2]) // 超过长度就会panic
+	b := a[:3]
+	println(len(b), cap(b)) // 3 5
+
+	b[2] = 9
+	a = append(a, 3) // 这里 a[2] 会覆盖上面的 b[2]
+	println(a[2])    // 3
+	println(b[2])    // 3
+
+	a = append(a, 4, 5, 6)
+	println(len(a), cap(a)) // 6 10 ，a 这里重新分配了底层数组
+
+	println(len(b), cap(b)) // 3 5 ，这里 b 还是用的原来底层数组，和 a 没关系了
+	b[2] = 9
+	println(a[2]) // 3 ，上面改变 b 就不会再影响 a 了
+	println(b[2]) // 9
 }
 ```
 
