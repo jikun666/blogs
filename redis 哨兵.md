@@ -115,7 +115,7 @@ sentinel monitor master 127.0.0.1 6379 3
 
 ## 选举领头 Sentinel
 
-领头 sentinel 负责对主节点进行故障转移操作。选举过程与 raft 协议中的 leader election 过程类似。
+领头 sentinel 负责对主节点进行故障转移操作。领头 sentinel 的选举过程与 raft 协议中的 leader election 过程类似。
 
 
 
