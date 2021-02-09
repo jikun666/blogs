@@ -272,3 +272,41 @@ recvq 和 sendq 中是等待消费和生产的 goroutines。
 
 
 ## context
+
+
+主要关注 timeout context，其实底层调用了 timer.AfterFunc 
+
+```go
+func WithDeadline(parent Context, d time.Time) (Context, CancelFunc) {
+	if parent == nil {
+		panic("cannot create context from nil parent")
+	}
+	if cur, ok := parent.Deadline(); ok && cur.Before(d) {
+		// The current deadline is already sooner than the new one.
+		return WithCancel(parent)
+	}
+	c := &timerCtx{
+		cancelCtx: newCancelCtx(parent),
+		deadline:  d,
+	}
+	propagateCancel(parent, c)
+	dur := time.Until(d)
+	if dur <= 0 {
+		c.cancel(true, DeadlineExceeded) // deadline has already passed
+		return c, func() { c.cancel(false, Canceled) }
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c.err == nil {
+		c.timer = time.AfterFunc(dur, func() {
+			c.cancel(true, DeadlineExceeded) // 这里会调用 timerCtx 的 cancel 函数
+		})
+	}
+	return c, func() { c.cancel(true, Canceled) }
+}
+```
+
+timerCtx 继承了 cancelCtx，在 timerCtx.cancel 方法中会调用 cancelCtx.cancel 方法，在该方法中会 close 完成管道，也就是 context.Done() 返回的管道。
+
+
+所以 timeout context 通过这样一个调用关系可以在外层监听 context.Done() 判断是否超时。
