@@ -268,3 +268,7 @@ recvq 和 sendq 中是等待消费和生产的 goroutines。
 **因写阻塞的goroutine会被从channel读数据的goroutine唤醒**，下面是向channel 读数据的过程：
 
 ![](images/channel-read.jpg)
+
+
+
+## context
