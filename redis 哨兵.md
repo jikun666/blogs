@@ -112,6 +112,12 @@ sentinel monitor master 127.0.0.1 6379 3
 
 即包括当前 sentinel 在内，总共至少要有 3 个 sentinel 都认为主节点已下线，当前 sentinel 才会将主节点判断为客观下线。
 
+---
+
+上面的主观、客观下线有点类似于 gossip 协议。
+
+---
+
 
 ## 选举领头 Sentinel
 
