@@ -53,6 +53,8 @@ func (aec *avgEcpmClient) loop(t time.Time) (err error) {
 }
 ```
 
+注意，想获取写锁，必须 mutex 的读锁、写锁都释放了才能获得，这也就是为什么在读 map 的时候有读锁，防止在读的过程中进行写 map。
+
 golang 中写锁的实现：
 
 ```golang
