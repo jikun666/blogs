@@ -24,6 +24,8 @@ agent - 即 consul agent，agent 中的信息由 consul client 自己维护。
 
 catalog - 是集群中所有 agent 中信息的抽象。catalog 中的信息由 consul servers 进行维护。
 
+即 consul agent 并不会存储整个集群的信息，它只存储通过自身注册的服务信息；整个集群的服务发现信息需要向 catalog 获得，即只有 consul servers 才存储整个集群的信息，catalog 是集群信息的高级api，包括了服务的可用性，服务的节点信息以及健康信息等等。通过 http 和 dns 接口暴露给外部。
+
 >
 >比如
 >

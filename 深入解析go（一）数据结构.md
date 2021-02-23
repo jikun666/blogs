@@ -223,6 +223,8 @@ func main() {
 - 向一个已经关闭的 channel 写会 panic；
 - 关闭一个已经关闭的 channel 会 panic；
 
+面试题：channel在什么情况下会panic？
+
 
 
 channel 定义：
