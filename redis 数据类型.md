@@ -7,7 +7,7 @@ Redis支持五种数据类型：string，list，hashmap，set 及 zset(有序集
 | 数据类型 | 实现 |
 |--|--|
 | string | 整数 / sds |
-| list | 压缩列表 / 双端链表 |
+| list | 压缩列表 / 双向链表 |
 | hash | 压缩列表 / 字典 |
 | set | 整数集合 / 字典 |
 | zset | 压缩列表 / 字典 / 跳跃表 |
