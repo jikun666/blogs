@@ -1,6 +1,14 @@
+# 进程状态
+
+开始、就绪、运行、等待、终止
+
+![](./images/process_stat.png)
+
+
+# 进程间通信方式
+
+
 https://blog.csdn.net/zhaohong_bo/article/details/89552188
-
-
 
 
 1. 管道

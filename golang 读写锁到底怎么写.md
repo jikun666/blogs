@@ -15,32 +15,6 @@ func (aec *avgEcpmClient) get(ctx context.Context, tagid string) (avgEcpm int64,
 }
 ```
 
-golang 中读锁的实现：
-
-```golang
-// RLock locks rw for reading.
-//
-// It should not be used for recursive read locking; a blocked Lock
-// call excludes new readers from acquiring the lock. See the
-// documentation on the RWMutex type.
-func (rw *RWMutex) RLock() {
-	if race.Enabled {
-		_ = rw.w.state
-		race.Disable()
-	}
-	if atomic.AddInt32(&rw.readerCount, 1) < 0 {
-		// A writer is pending, wait for it.
-		runtime_SemacquireMutex(&rw.readerSem, false, 0)
-	}
-	if race.Enabled {
-		race.Enable()
-		race.Acquire(unsafe.Pointer(&rw.readerSem))
-	}
-}
-```
-
-注释中有写到当读锁未释放时，将会阻塞其他读锁获取者。
-
 写map的时候使用写锁：
 
 ```golang
@@ -53,33 +27,123 @@ func (aec *avgEcpmClient) loop(t time.Time) (err error) {
 }
 ```
 
-注意，想获取写锁，必须 mutex 的读锁、写锁都释放了才能获得，这也就是为什么在读 map 的时候有读锁，防止在读的过程中进行写 map。
 
-golang 中写锁的实现：
 
-```golang
-// Lock locks rw for writing.
-// If the lock is already locked for reading or writing,
-// Lock blocks until the lock is available.
-func (rw *RWMutex) Lock() {
-	if race.Enabled {
-		_ = rw.w.state
-		race.Disable()
-	}
-	// First, resolve competition with other writers.
-	rw.w.Lock()
-	// Announce to readers there is a pending writer.
-	r := atomic.AddInt32(&rw.readerCount, -rwmutexMaxReaders) + rwmutexMaxReaders
-	// Wait for active readers.
-	if r != 0 && atomic.AddInt32(&rw.readerWait, r) != 0 {
-		runtime_SemacquireMutex(&rw.writerSem, false, 0)
-	}
-	if race.Enabled {
-		race.Enable()
-		race.Acquire(unsafe.Pointer(&rw.readerSem))
-		race.Acquire(unsafe.Pointer(&rw.writerSem))
-	}
+实战:
+
+```go
+package main
+
+import (
+	"sync"
+	"time"
+)
+
+func main() {
+	mutex := sync.RWMutex{}
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		mutex.RLock()
+		println("goroutine a get lock")
+		time.Sleep(2 * time.Second)
+		println("goroutine a release lock")
+		mutex.RUnlock()
+
+		wg.Done()
+	}()
+
+	go func() {
+		time.Sleep(2 * time.Millisecond)
+		mutex.RLock()
+		println("goroutine c get lock")
+		time.Sleep(5 * time.Millisecond)
+		println("goroutine c release lock")
+		mutex.RUnlock()
+
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
 ```
 
-注释中有写到如果有读锁和写锁的未释放时，将会阻塞等待。
+输出
+```
+goroutine a get lock
+goroutine c get lock // 和上面一行几乎同时输出
+goroutine c release lock
+goroutine a release lock
+```
+
+如上代码所示，goroutine a 加读锁之后，goroutine c 也能直接获取读锁。
+
+再通过其他的实验总结：
+
+加读锁之后，可以再获取读锁，但无法获取写锁；
+
+加写锁之后，无法获得读锁和写锁。
+
+注意，获取锁的goroutine会排队，比如 a 加了读锁，b 来获取写锁失败，然后 c 想再获取读锁也会失败，c 必须等写锁 b 获取之后并释放才能获得锁，如下：
+
+```go
+package main
+
+import (
+	"sync"
+	"time"
+)
+
+func main() {
+	mutex := sync.RWMutex{}
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+
+	go func() {
+		mutex.RLock()
+		println("goroutine a get lock")
+		time.Sleep(2 * time.Second)
+		println("goroutine a release lock")
+		mutex.RUnlock()
+
+		wg.Done()
+	}()
+
+	go func() {
+		time.Sleep(2 * time.Millisecond)
+		mutex.Lock()
+		println("goroutine b get lock")
+		time.Sleep(3 * time.Second)
+		println("goroutine b release lock")
+		mutex.Unlock()
+
+		wg.Done()
+	}()
+
+	go func() {
+		time.Sleep(5 * time.Millisecond)
+		mutex.RLock()
+		println("goroutine c get lock")
+		time.Sleep(5 * time.Millisecond)
+		println("goroutine c release lock")
+		mutex.RUnlock()
+
+		wg.Done()
+	}()
+
+	wg.Wait()
+}
+```
+
+输出
+
+```
+goroutine a get lock
+goroutine a release lock
+goroutine b get lock // a获得锁2秒后才输出
+goroutine b release lock
+goroutine c get lock // b获得锁3秒后才输出
+goroutine c release lock
+```
+
