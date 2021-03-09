@@ -3,7 +3,7 @@
 主要比对 Kafka 和 RocketMQ。
 
 
-RocketMQ 由阿里开源捐给 apache 的。
+RocketMQ 由阿里开源捐给 apache 的。（据阿里的朋友说是因为搞不懂 scala 无法进行二次开发）
 
 RocketMQ 号称延迟和可靠性方面更优。
 
@@ -20,3 +20,10 @@ https://github.com/apache/rocketmq/blob/master/docs/cn/features.md
 3. 消息重试/消息重投
 
 4. 死信队列。死信队列用于处理无法被正常消费的消息。当一条消息初次消费失败，消息队列会自动进行消息重试；达到最大重试次数后，若消费依然失败，则表明消费者在正常情况下无法正确地消费该消息，此时，消息队列 不会立刻将消息丢弃，而是将其发送到该消费者对应的特殊队列中。
+
+
+RocketMQ 也有一些缺点：
+
+1. 发展并没有kafka 成熟，很多坑还需要自己去踩
+2. 单机写入没有kafka快（十万 vs 百万）
+3. 各语言的 sdk 支持不完善（golang nodejs）
